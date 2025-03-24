@@ -6,8 +6,9 @@ terraform {
     }
   }
 
-  backend "s3" {
+  backend "oci" {
     endpoint = "https://orasenatdoracledigital04.compat.objectstorage.us-ashburn-1.oraclecloud.com"
+namespace = "orasenatdoracledigital04"
     bucket   = "haribucket"
     region   = "us-ashburn-1"
     key      = "terraform/state/terraform.tfstate"
