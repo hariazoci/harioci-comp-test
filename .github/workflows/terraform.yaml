@@ -1,4 +1,4 @@
-name: Deploy OCI Compartment with Remote State
+name: Deploy OCI Compartment with Public Bucket
 
 on:
   push:
@@ -53,7 +53,7 @@ jobs:
           oci --version
 
       # Step 6: Fix OCI Config File Permissions
-      - name: Fix OCI Config File Permissions
+      - name: Fix OCI File Permissions
         run: |
           oci setup repair-file-permissions --file ~/.oci/config
           oci setup repair-file-permissions --file ~/.oci/key.pem
@@ -72,8 +72,7 @@ jobs:
           TF_VAR_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
           TF_VAR_region: ${{ secrets.OCI_REGION }}
           TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-        run: |
-          terraform init -backend-config="access_key=${{ secrets.OCI_ACCESS_KEY }}"
+        run: terraform init
 
       # Step 9: Plan Terraform Changes
       - name: Terraform Plan
