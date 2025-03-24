@@ -39,40 +39,43 @@ jobs:
           curl -L -O https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh
           chmod +x install.sh
           ./install.sh --accept-all-defaults --oci-cli-version 3.51.5
-          echo "/home/runner/.oci-cli/bin" >> $GITHUB_PATH
-          echo "/home/runner/bin" >> $GITHUB_PATH
-          source $GITHUB_PATH
 
-      # Step 4: Test OCI CLI Installation
+      # Step 4: Add OCI CLI to PATH
+      - name: Add OCI CLI to PATH
+        run: |
+          echo "/home/runner/bin" >> $GITHUB_PATH
+          echo "PATH updated to include OCI CLI."
+
+      # Step 5: Validate OCI CLI Installation
       - name: Validate OCI CLI Installation
         run: |
           oci --version
 
-      # Step 5: Fix OCI File Permissions
+      # Step 6: Fix OCI File Permissions
       - name: Fix OCI Config File Permissions
         run: |
           oci setup repair-file-permissions --file ~/.oci/config
           oci setup repair-file-permissions --file ~/.oci/key.pem
 
-      # Step 6: Setup Terraform
+      # Step 7: Setup Terraform
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.7
 
-      # Step 7: Initialize Terraform (Local Backend)
+      # Step 8: Initialize Terraform (Local Backend)
       - name: Terraform Init
         run: |
           terraform init
 
-      # Step 8: Plan Terraform Changes
+      # Step 9: Plan Terraform Changes
       - name: Terraform Plan
         env:
           TF_LOG: DEBUG  # Enable detailed logs
         run: |
           terraform plan
 
-      # Step 9: Apply Terraform Changes
+      # Step 10: Apply Terraform Changes
       - name: Apply Terraform Changes
         env:
           TF_LOG: DEBUG
