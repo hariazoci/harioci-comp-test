@@ -7,61 +7,68 @@ on:
 
 jobs:
   terraform:
+    name: Run OCI Terraform
     runs-on: ubuntu-latest
-
+    permissions:
+      actions: read
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      # Step 1: Checkout the code from the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # Step 1: Clone Repository
+      - name: Clone repo
+        uses: actions/checkout@v4
 
-      # Step 2: Setup Terraform
-      - name: Setup Terraform
+      # Step 2: Write OCI Config and Private Key Files
+      - name: Write Config & Key Files
+        run: |
+          mkdir ~/.oci
+          echo "[DEFAULT]" >> ~/.oci/config
+          echo "user=${{ secrets.OCI_USER_OCID }}" >> ~/.oci/config
+          echo "fingerprint=${{ secrets.OCI_FINGERPRINT }}" >> ~/.oci/config
+          echo "region=${{ secrets.OCI_REGION }}" >> ~/.oci/config
+          echo "tenancy=${{ secrets.OCI_TENANCY_OCID }}" >> ~/.oci/config
+          echo "key_file=~/.oci/key.pem" >> ~/.oci/config
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/key.pem
+          chmod 600 ~/.oci/key.pem
+          chmod 600 ~/.oci/config
+
+      # Step 3: Install OCI CLI
+      - name: Install OCI CLI
+        run: |
+          curl -L -O https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults --oci-cli-version 3.51.5
+          echo "/home/runner/bin" >> $GITHUB_PATH
+          exec -l $SHELL
+
+      # Step 4: Fix OCI File Permissions
+      - name: Fix OCI Config File Permissions
+        run: |
+          oci setup repair-file-permissions --file ~/.oci/config
+          oci setup repair-file-permissions --file ~/.oci/key.pem
+
+      # Step 5: Setup Terraform
+      - name: Terraform Setup
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.4.6
+          terraform_version: 1.5.7
 
-      # Step 3: Write the OCI Private Key to a File
-      - name: Write Private Key to File
-        env:
-          PRIVATE_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
+      # Step 6: Initialize Terraform (Local Backend)
+      - name: Terraform Init
         run: |
-          echo "$PRIVATE_KEY_CONTENT" > private_key.pem
-          chmod 600 private_key.pem
+          terraform init
 
-      # Step 4: Debugging Step (Optional)
-      - name: Debug Environment Variables
+      # Step 7: Plan Terraform Changes
+      - name: Terraform Plan
+        env:
+          TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
-          echo "OCI_TENANCY_OCID=${{ secrets.OCI_TENANCY_OCID }}"
-          echo "OCI_USER_OCID=${{ secrets.OCI_USER_OCID }}"
-          echo "OCI_FINGERPRINT=${{ secrets.OCI_FINGERPRINT }}"
-          echo "OCI_REGION=${{ secrets.OCI_REGION }}"
+          terraform plan -var-file="oci-variables.tfvars" -var-file="cloudguard.tfvars" -var-file="securityzones.tfvars"
 
-      # Step 5: Initialize Terraform
-      - name: Initialize Terraform
-        env:
-          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
-          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
-          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_PRIVATE_KEY_PATH: ./private_key.pem
-        run: terraform init
-
-      # Step 6: Plan Terraform Changes
-      - name: Plan Terraform Changes
-        env:
-          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
-          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
-          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_PRIVATE_KEY_PATH: ./private_key.pem
-        run: terraform plan
-
-      # Step 7: Apply Terraform Changes
+      # Step 8: Apply Terraform Changes
       - name: Apply Terraform Changes
         env:
-          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
-          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
-          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_PRIVATE_KEY_PATH: ./private_key.pem
-        run: terraform apply -auto-approve
+          TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
+        run: |
+          terraform apply -auto-approve
