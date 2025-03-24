@@ -10,9 +10,6 @@ terraform {
     address       = "https://objectstorage.us-ashburn-1.oraclecloud.com/p/HgpptHwJp9IzrHdtRuG8hw2Gqh89VCZJ-LT0PiUqXY02cha4GRa-ClB1RHiO9QxP/n/orasenatdoracledigital04/b/haribucket/o/"
     update_method = "PUT"
 
-    region = "us-ashburn-1"
-    key    = "terraform/state/terraform.tfstate"
-
   }
 }
 
