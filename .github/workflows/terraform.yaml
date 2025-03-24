@@ -1,4 +1,4 @@
-name: Destroy OCI Resources
+name: Deploy OCI Compartment
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    timeout-minutes: 20  # Extended timeout
+    timeout-minutes: 20 # Extended timeout
 
     steps:
       # Step 1: Clone Repository
@@ -80,8 +80,8 @@ jobs:
         run: |
           terraform plan
 
-      # Step 10: Destroy Terraform Resources
-      - name: Destroy Terraform Resources
+      # Step 10: Apply Terraform Changes
+      - name: Apply Terraform Changes
         env:
           TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
           TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
@@ -89,4 +89,4 @@ jobs:
           TF_VAR_region: ${{ secrets.OCI_REGION }}
           TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
         run: |
-          terraform destroy -auto-approve
+          terraform apply -auto-approve
