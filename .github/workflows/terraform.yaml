@@ -10,28 +10,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code from the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.4.6
 
-      - name: Configure OCI Environment Variables
+      # Step 3: Write the OCI Private Key to a File
+      - name: Write Private Key to File
+        env:
+          PRIVATE_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
+        run: |
+          echo "$PRIVATE_KEY_CONTENT" > private_key.pem
+          chmod 600 private_key.pem
+
+      # Step 4: Debugging Step (Optional)
+      - name: Debug Environment Variables
+        run: |
+          echo "OCI_TENANCY_OCID=${{ secrets.OCI_TENANCY_OCID }}"
+          echo "OCI_USER_OCID=${{ secrets.OCI_USER_OCID }}"
+          echo "OCI_FINGERPRINT=${{ secrets.OCI_FINGERPRINT }}"
+          echo "OCI_REGION=${{ secrets.OCI_REGION }}"
+
+      # Step 5: Initialize Terraform
+      - name: Initialize Terraform
         env:
           OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
           OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
           OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
           OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_PRIVATE_KEY_PATH: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
-        run: echo "Environment variables configured."
-
-      - name: Initialize Terraform
+          OCI_PRIVATE_KEY_PATH: ./private_key.pem
         run: terraform init
 
+      # Step 6: Plan Terraform Changes
       - name: Plan Terraform Changes
+        env:
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_PRIVATE_KEY_PATH: ./private_key.pem
         run: terraform plan
 
+      # Step 7: Apply Terraform Changes
       - name: Apply Terraform Changes
+        env:
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_PRIVATE_KEY_PATH: ./private_key.pem
         run: terraform apply -auto-approve
