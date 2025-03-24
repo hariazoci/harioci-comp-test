@@ -8,11 +8,16 @@ terraform {
 }
 
 terraform {
-  backend "oci" {
+  backend "s3" {
+endpoint = "https://orasenatdoracledigital04.compat.objectstorage.region.oraclecloud.com"
     bucket          = "haribucket"
-    namespace       = "orasenatdoracledigital04"
-    region          = "var.region"
+    region          = "us-ashburn-1"
     key             = "terraform/state/terraform.tfstate" # Path to the state file
+ skip_region_validation     = true
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check    = true
+    use_path_style             = true
   }
 }
 provider "oci" {
