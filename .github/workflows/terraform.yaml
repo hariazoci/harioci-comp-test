@@ -12,8 +12,8 @@ jobs:
     permissions:
       actions: read
       contents: read
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    timeout-minutes: 20  # Extended timeout
+
     steps:
       # Step 1: Clone Repository
       - name: Clone repo
@@ -33,7 +33,12 @@ jobs:
           chmod 600 ~/.oci/key.pem
           chmod 600 ~/.oci/config
 
-      # Step 3: Install OCI CLI
+      # Step 3: Test OCI Connectivity
+      - name: Test OCI Connectivity
+        run: |
+          oci iam region list
+
+      # Step 4: Install OCI CLI
       - name: Install OCI CLI
         run: |
           curl -L -O https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh
@@ -42,33 +47,33 @@ jobs:
           echo "/home/runner/bin" >> $GITHUB_PATH
           exec -l $SHELL
 
-      # Step 4: Fix OCI File Permissions
+      # Step 5: Fix OCI File Permissions
       - name: Fix OCI Config File Permissions
         run: |
           oci setup repair-file-permissions --file ~/.oci/config
           oci setup repair-file-permissions --file ~/.oci/key.pem
 
-      # Step 5: Setup Terraform
+      # Step 6: Setup Terraform
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.7
 
-      # Step 6: Initialize Terraform (Local Backend)
+      # Step 7: Initialize Terraform (Local Backend)
       - name: Terraform Init
         run: |
           terraform init
 
-      # Step 7: Plan Terraform Changes
+      # Step 8: Plan Terraform Changes
       - name: Terraform Plan
         env:
-          TF_VAR_oci_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
+          TF_LOG: DEBUG  # Enable detailed logs
         run: |
           terraform plan
 
-      # Step 8: Apply Terraform Changes
+      # Step 9: Apply Terraform Changes
       - name: Apply Terraform Changes
         env:
-          TF_VAR_oci_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
+          TF_LOG: DEBUG
         run: |
           terraform apply -auto-approve
