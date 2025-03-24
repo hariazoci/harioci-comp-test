@@ -7,6 +7,14 @@ terraform {
   }
 }
 
+terraform {
+  backend "oci" {
+    bucket          = "haribucket"
+    namespace       = "orasenatdoracledigital04"
+    region          = "var.region"
+    key             = "terraform/state/terraform.tfstate" # Path to the state file
+  }
+}
 provider "oci" {
   tenancy_ocid     = var.tenancy_ocid
   user_ocid        = var.user_ocid
