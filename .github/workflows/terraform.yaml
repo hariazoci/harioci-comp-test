@@ -12,7 +12,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    timeout-minutes: 20  # Extended timeout
+    timeout-minutes: 20 # Extended timeout
 
     steps:
       # Step 1: Clone Repository
@@ -52,7 +52,7 @@ jobs:
         run: |
           oci --version
 
-      # Step 6: Fix OCI File Permissions
+      # Step 6: Fix OCI Config File Permissions
       - name: Fix OCI Config File Permissions
         run: |
           oci setup repair-file-permissions --file ~/.oci/config
@@ -67,18 +67,17 @@ jobs:
       # Step 8: Initialize Terraform with Remote State
       - name: Terraform Init
         env:
-          TF_VAR_access_key: ${{ secrets.OCI_ACCESS_KEY }}       # S3 interoperability access key
           TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
           TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
           TF_VAR_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
           TF_VAR_region: ${{ secrets.OCI_REGION }}
           TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-        run: terraform init
+        run: |
+          terraform init -backend-config="access_key=${{ secrets.OCI_ACCESS_KEY }}"
 
       # Step 9: Plan Terraform Changes
       - name: Terraform Plan
         env:
-          TF_VAR_access_key: ${{ secrets.OCI_ACCESS_KEY }}
           TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
           TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
           TF_VAR_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
@@ -89,7 +88,6 @@ jobs:
       # Step 10: Apply Terraform Changes
       - name: Apply Terraform Changes
         env:
-          TF_VAR_access_key: ${{ secrets.OCI_ACCESS_KEY }}
           TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
           TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
           TF_VAR_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
