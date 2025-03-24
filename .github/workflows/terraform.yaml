@@ -84,12 +84,12 @@ jobs:
           TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
         run: terraform plan
 
-      # Step 10: Apply Terraform Changes
-      - name: Apply Terraform Changes
+      # Step 10: Destroy Terraform Changes
+      - name: Destroy Terraform Changes
         env:
           TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
           TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
           TF_VAR_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
           TF_VAR_region: ${{ secrets.OCI_REGION }}
           TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-        run: terraform apply -auto-approve
+        run: terraform destroy -auto-approve
