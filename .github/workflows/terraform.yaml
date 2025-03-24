@@ -40,10 +40,11 @@ jobs:
           chmod +x install.sh
           ./install.sh --accept-all-defaults --oci-cli-version 3.51.5
 
-      # Step 4: Add OCI CLI to PATH
+      # Step 4: Add OCI CLI to PATH and Reload Shell
       - name: Add OCI CLI to PATH
         run: |
           echo "/home/runner/bin" >> $GITHUB_PATH
+          export PATH=$PATH:/home/runner/bin
           echo "PATH updated to include OCI CLI."
 
       # Step 5: Validate OCI CLI Installation
@@ -71,6 +72,11 @@ jobs:
       # Step 9: Plan Terraform Changes
       - name: Terraform Plan
         env:
+          TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
+          TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+          TF_VAR_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
+          TF_VAR_region: ${{ secrets.OCI_REGION }}
+          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
           TF_LOG: DEBUG  # Enable detailed logs
         run: |
           terraform plan
@@ -78,6 +84,11 @@ jobs:
       # Step 10: Apply Terraform Changes
       - name: Apply Terraform Changes
         env:
+          TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
+          TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+          TF_VAR_private_key_path: ${{ secrets.OCI_PRIVATE_KEY_PATH }}
+          TF_VAR_region: ${{ secrets.OCI_REGION }}
+          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
           TF_LOG: DEBUG
         run: |
           terraform apply -auto-approve
