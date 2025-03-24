@@ -7,7 +7,7 @@ terraform {
   }
 
   backend "http" {
-    address       = "https://objectstorage.us-ashburn-1.oraclecloud.com/p/5kPpW9BAC3zVBqrIN30RIZRT5w7au11vrpklORkbJ6rsqJxmGvBDrfcKEz0DV6NM/n/orasenatdoracledigital04/b/haribucket/o/"
+    address       = "https://objectstorage.us-ashburn-1.oraclecloud.com/p/VxuyuhQ_sZd7mItyOJ5RfdPDhzBRonnoG-oVa1dFJTx9TdJ__gFDBtNIoiXULLL8/n/orasenatdoracledigital04/b/haribucket/o/terraform.tfstate"
     update_method = "PUT"
 
   }
