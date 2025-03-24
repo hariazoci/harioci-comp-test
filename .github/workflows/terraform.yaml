@@ -1,4 +1,4 @@
-name: Deploy OCI Compartment with Public Bucket
+name: Deploy OCI Compartment with HTTP Backend
 
 on:
   push:
@@ -52,8 +52,8 @@ jobs:
         run: |
           oci --version
 
-      # Step 6: Fix OCI Config File Permissions
-      - name: Fix OCI File Permissions
+      # Step 6: Fix OCI File Permissions
+      - name: Fix OCI Config File Permissions
         run: |
           oci setup repair-file-permissions --file ~/.oci/config
           oci setup repair-file-permissions --file ~/.oci/key.pem

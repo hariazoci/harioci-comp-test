@@ -6,17 +6,13 @@ terraform {
     }
   }
 
-  backend "oci" {
-    endpoint = "https://orasenatdoracledigital04.compat.objectstorage.us-ashburn-1.oraclecloud.com"
-namespace = "orasenatdoracledigital04"
-    bucket   = "haribucket"
-    region   = "us-ashburn-1"
-    key      = "terraform/state/terraform.tfstate"
-    
-    skip_region_validation     = true
-    skip_credentials_validation = true
-    skip_metadata_api_check    = true
-    force_path_style           = true
+  backend "http" {
+    address       = "https://objectstorage.us-ashburn-1.oraclecloud.com/p/HgpptHwJp9IzrHdtRuG8hw2Gqh89VCZJ-LT0PiUqXY02cha4GRa-ClB1RHiO9QxP/n/orasenatdoracledigital04/b/haribucket/o/"
+    update_method = "PUT"
+
+    region = "us-ashburn-1"
+    key    = "terraform/state/terraform.tfstate"
+
   }
 }
 
