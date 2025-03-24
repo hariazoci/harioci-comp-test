@@ -10,7 +10,6 @@ terraform {
     endpoint = "https://orasenatdoracledigital04.compat.objectstorage.us-ashburn-1.oraclecloud.com"
     bucket   = "haribucket"
     region   = "us-ashburn-1"
-    access_key = var.access_key
     key      = "terraform/state/terraform.tfstate"
     
     skip_region_validation     = true
