@@ -64,7 +64,7 @@ jobs:
         env:
           TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
-          terraform plan -var-file="oci-variables.tfvars" -var-file="cloudguard.tfvars" -var-file="securityzones.tfvars"
+          terraform plan
 
       # Step 8: Apply Terraform Changes
       - name: Apply Terraform Changes
